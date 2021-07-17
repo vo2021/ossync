@@ -119,6 +119,7 @@ var (
 	bucket   = "bucket-name"
 	output   = "."
 	interval = 10 // seconds
+	debug    = false
 )
 
 func main() {
@@ -126,6 +127,7 @@ func main() {
 	flag.StringVar(&profile, "profile", "DEFAULT", "the OCI profile name")
 	flag.StringVar(&output, "output", "", "the local folder path to sync to")
 	flag.IntVar(&interval, "interval", 10, "the interval between sync")
+	flag.BoolVar(&debug, "debug", false, "debug mode")
 	flag.Parse()
 
 	mainLoop()
@@ -145,6 +147,9 @@ func mainLoop() {
 
 		// cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s >  %s.json", bucket, profile, bucket)
 		cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s", bucket, profile)
+		if debug {
+			fmt.Print(cmd)
+		}
 		out, err := exec.Command("bash", "-c", cmd).Output()
 		if err != nil {
 			if exitError, ok := err.(*exec.ExitError); ok {
@@ -152,7 +157,9 @@ func mainLoop() {
 			}
 			log.Fatalf("💀 bad cmd: %s", cmd)
 		}
-		// fmt.Printf("The date is %s\n", out)
+		if debug {
+			fmt.Print(out)
+		}
 
 		// https://www.sohamkamani.com/golang/parsing-json/
 		var result map[string]interface{}
@@ -191,7 +198,7 @@ func mainLoop() {
 				if strings.HasSuffix(name, "/") {
 					continue
 				}
-				fmt.Printf("Download %s\n", name)
+				fmt.Printf("sync %s\n", name)
 				if strings.ContainsAny(name, "/") {
 					i := strings.LastIndex(name, "/")
 					if output != "" && !strings.HasSuffix(output, "/") {
@@ -201,6 +208,9 @@ func mainLoop() {
 					createFolder(folder)
 					outfile := output + name
 					cmd := fmt.Sprintf("oci os object get --name %s --file %s -bn %s --profile %s", name, outfile, bucket, profile)
+					if debug {
+						fmt.Print(cmd)
+					}
 					_, err := exec.Command("bash", "-c", cmd).Output()
 					if err != nil {
 						log.Fatal(err)
