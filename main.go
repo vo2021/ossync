@@ -10,7 +10,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"os/user"
-	"ossync/jsondiff"
+	"github.com/vo2021/ossync/jsondiff"
 	"path"
 	"path/filepath"
 	"strings"
