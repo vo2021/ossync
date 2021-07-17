@@ -148,17 +148,17 @@ func mainLoop() {
 		// cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s >  %s.json", bucket, profile, bucket)
 		cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s", bucket, profile)
 		if debug {
-			fmt.Print(cmd)
+			fmt.Println(cmd)
 		}
 		out, err := exec.Command("bash", "-c", cmd).Output()
 		if err != nil {
 			if exitError, ok := err.(*exec.ExitError); ok {
-				fmt.Print("💀 " + string(exitError.Stderr))
+				fmt.Println("💀 " + string(exitError.Stderr))
 			}
 			log.Fatalf("💀 bad cmd: %s", cmd)
 		}
 		if debug {
-			fmt.Print(out)
+			fmt.Println(string(out))
 		}
 
 		// https://www.sohamkamani.com/golang/parsing-json/
@@ -169,10 +169,10 @@ func mainLoop() {
 		if diffs := jsondiff.JSONDiff(cached, result, true, ""); len(diffs) == 0 {
 			fmt.Print("🙈")
 		} else {
-			fmt.Print("\n")
 			/*for i, v := range diffs {
 				fmt.Printf("%n: %s\n", i, v)
 			}*/
+			fmt.Print("\n")
 			var oldData []interface{}
 			if cached != nil {
 				oldData = cached["data"].([]interface{})
@@ -209,7 +209,7 @@ func mainLoop() {
 					outfile := output + name
 					cmd := fmt.Sprintf("oci os object get --name %s --file %s -bn %s --profile %s", name, outfile, bucket, profile)
 					if debug {
-						fmt.Print(cmd)
+						fmt.Println(cmd)
 					}
 					_, err := exec.Command("bash", "-c", cmd).Output()
 					if err != nil {
