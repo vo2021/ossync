@@ -20,3 +20,6 @@ Usage of ./ossync.exe:
   -profile string
         the OCI profile name (default "DEFAULT")
 ```
+
+
+![](dev.png)
