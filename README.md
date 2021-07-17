@@ -12,9 +12,11 @@ go build -o ossync.exe
 $./ossync.exe --help
 Usage of ./ossync.exe:
   -bucket string
-    	the OCI bucket which is synced to local (default "bucket-name")
+        the OCI bucket which is synced to local (default "bucket-name")
   -interval int
-    	the interval between sync (default 10)
+        the interval between sync (default 10)
+  -output string
+        the local folder path to sync to
   -profile string
-    	the OCI profile name (default "DEFAULT")
+        the OCI profile name (default "DEFAULT")
 ```
