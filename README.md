@@ -20,3 +20,8 @@ Usage of ./ossync.exe:
   -profile string
         the OCI profile name (default "DEFAULT")
 ```
+
+## TODO
+
+- sync sub folder
+
