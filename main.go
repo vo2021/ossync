@@ -183,7 +183,7 @@ func mainLoop() {
 			/*for i, v := range diffs {
 				fmt.Printf("%n: %s\n", i, v)
 			}*/
-			fmt.Print("\n")
+			fmt.Print("\n🐵\n")
 			var oldData []interface{}
 			if cached != nil {
 				oldData = cached["data"].([]interface{})
