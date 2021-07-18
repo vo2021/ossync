@@ -18,6 +18,14 @@ import (
 	"time"
 )
 
+var (
+	profile  = "profile-name"
+	bucket   = "bucket-name"
+	output   = "."
+	interval = 10 // seconds
+	debug    = false
+)
+
 // IsFile Verifies if the path is valid
 func IsFile(filePath string) bool {
 	info, err := os.Stat(filePath)
@@ -82,8 +90,14 @@ func get_config_folder() string {
 
 func get_metadata_filename(output, bucket string) string {
 	configFolder := get_config_folder()
-	output = strings.TrimLeft(output, "/~.")
-	name := configFolder + "/" + strings.Replace(output, "/", "-", -1) + bucket + ".json"
+	output = strings.Trim(output, "/~.")
+	if len(output)==0 {
+		output, _ = os.Getwd()
+	}
+	name := configFolder + "/" + strings.Replace(output, "/", "_", -1) + "-" + bucket + ".json"
+	if debug {
+		fmt.Println("metadata file name: " + name)
+	}
 	return name
 }
 
@@ -95,6 +109,10 @@ func get_local_bucket_metadata(output, bucket string) map[string]interface{} {
 	dat, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		panic(bucket + " not found!")
+	}
+
+	if debug {
+		fmt.Println("metadata: " + string(dat))
 	}
 
 	var result map[string]interface{}
@@ -113,14 +131,6 @@ func cleanup() {
 		time.Sleep(1)
 	}
 }
-
-var (
-	profile  = "profile-name"
-	bucket   = "bucket-name"
-	output   = "."
-	interval = 10 // seconds
-	debug    = false
-)
 
 func main() {
 	flag.StringVar(&bucket, "bucket", "bucket-name", "the OCI bucket which is synced to local")
