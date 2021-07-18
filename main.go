@@ -94,6 +94,7 @@ func get_metadata_filename(output, bucket string) string {
 	if len(output)==0 {
 		output, _ = os.Getwd()
 	}
+	createFolder(configFolder)
 	name := configFolder + "/" + strings.Replace(output, "/", "_", -1) + "-" + bucket + ".json"
 	if debug {
 		fmt.Println("metadata file name: " + name)
@@ -230,7 +231,7 @@ func mainLoop() {
 			writeFile(get_metadata_filename(output, bucket), string(out))
 		}
 		syncing = false
-		time.Sleep(10 * time.Second)
+		time.Sleep(time.Duration(interval) * time.Second)
 	}
 
 }
