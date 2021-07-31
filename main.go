@@ -91,7 +91,7 @@ func get_config_folder() string {
 func get_metadata_filename(output, bucket string) string {
 	configFolder := get_config_folder()
 	output = strings.Trim(output, "/~.")
-	if len(output)==0 {
+	if len(output) == 0 {
 		output, _ = os.Getwd()
 	}
 	createFolder(configFolder)
@@ -133,7 +133,7 @@ func cleanup() {
 	}
 }
 
-func expandHome(path string) string{
+func expandHome(path string) string {
 	usr, _ := user.Current()
 	dir := usr.HomeDir
 	if path == "~" {
