@@ -256,10 +256,13 @@ func createFolder(p string) (*os.File, error) {
 	if b, _ := existsFile(p); b {
 		return nil, nil
 	}
-	if err := os.MkdirAll(filepath.Dir(p), 0770); err != nil {
-		return nil, err
+	if err := os.Mkdir(p, 0770); err == nil {
+		return nil, nil
 	}
-	return os.Create(p)
+	if err := os.MkdirAll(p, 0770); err == nil {
+		return nil, nil
+	}
+	return nil, fmt.Errorf("failed to create %s", p)
 }
 
 // exists returns whether the given file or directory exists
