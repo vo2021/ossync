@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/vo2021/ossync/jsondiff"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
 	"os/signal"
 	"os/user"
-	"github.com/vo2021/ossync/jsondiff"
 	"path"
 	"path/filepath"
 	"strings"
@@ -133,6 +133,17 @@ func cleanup() {
 	}
 }
 
+func expandHome(path string) string{
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	if path == "~" {
+		path = dir
+	} else if strings.HasPrefix(path, "~/") {
+		path = filepath.Join(dir, path[2:])
+	}
+	return path
+}
+
 func main() {
 	flag.StringVar(&bucket, "bucket", "bucket-name", "the OCI bucket which is synced to local")
 	flag.StringVar(&profile, "profile", "DEFAULT", "the OCI profile name")
@@ -140,6 +151,8 @@ func main() {
 	flag.IntVar(&interval, "interval", 10, "the interval between sync")
 	flag.BoolVar(&debug, "debug", false, "debug mode")
 	flag.Parse()
+
+	output = expandHome(output)
 
 	mainLoop()
 }
@@ -218,7 +231,7 @@ func mainLoop() {
 					folder := output + name[:i+1]
 					createFolder(folder)
 					outfile := output + name
-					cmd := fmt.Sprintf("oci os object get --name %s --file %s -bn %s --profile %s", name, outfile, bucket, profile)
+					cmd := fmt.Sprintf("oci os object get --name '%s' --file '%s' -bn %s --profile %s", name, outfile, bucket, profile)
 					if debug {
 						fmt.Println(cmd)
 					}
