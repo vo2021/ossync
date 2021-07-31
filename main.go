@@ -94,7 +94,10 @@ func get_metadata_filename(output, bucket string) string {
 	if len(output) == 0 {
 		output, _ = os.Getwd()
 	}
-	createFolder(configFolder)
+	f, err := createFolder(configFolder)
+	if f == nil && err != nil {
+		println("create folder failed: " + fmt.Sprintf("error(%v)", err))
+	}
 	name := configFolder + "/" + strings.Replace(output, "/", "_", -1) + "-" + bucket + ".json"
 	if debug {
 		fmt.Println("metadata file name: " + name)
