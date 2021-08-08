@@ -22,7 +22,6 @@ var (
 	profile  = "profile-name"
 	bucket   = "bucket-name"
 	prefix   = "prefix-name"
-	suffix   = "suffix-name"
 	output   = "."
 	interval = 10 // seconds
 	debug    = false
@@ -90,7 +89,7 @@ func get_config_folder() string {
 	return configFolder
 }
 
-func get_metadata_filename(output, bucket string) string {
+func get_metadata_filename(output, bucket, prefix string) string {
 	configFolder := get_config_folder()
 	output = strings.Trim(output, "/~.")
 	if len(output) == 0 {
@@ -100,15 +99,15 @@ func get_metadata_filename(output, bucket string) string {
 	if f == nil && err != nil {
 		println("create folder failed: " + fmt.Sprintf("error(%v)", err))
 	}
-	name := configFolder + "/" + strings.Replace(output, "/", "_", -1) + "-" + bucket + ".json"
+	name := configFolder + "/" + strings.Replace(output, "/", "_", -1) + "-" + bucket+ "-" + strings.Replace(prefix, "/", "_", -1) + ".json"
 	if debug {
 		fmt.Println("metadata file name: " + name)
 	}
 	return name
 }
 
-func get_local_bucket_metadata(output, bucket string) map[string]interface{} {
-	fileName := get_metadata_filename(output, bucket)
+func get_local_bucket_metadata(output, bucket string, prefix string) map[string]interface{} {
+	fileName := get_metadata_filename(output, bucket, prefix)
 	if b, _ := existsFile(fileName); !b {
 		return nil //make(map[string]interface{})
 	}
@@ -152,7 +151,6 @@ func expandHome(path string) string {
 func main() {
 	flag.StringVar(&bucket, "bucket", "bucket-name", "the OCI bucket which is synced to local")
 	flag.StringVar(&prefix, "prefix", "", "the prefix of a folder or file in the OCI bucket which is synced to local")
-	flag.StringVar(&suffix, "suffix", "", "the suffix of a folder or file in the OCI bucket which is synced to local")
 	flag.StringVar(&profile, "profile", "DEFAULT", "the OCI profile name")
 	flag.StringVar(&output, "output", "", "the local folder path to sync to")
 	flag.IntVar(&interval, "interval", 10, "the interval between sync")
@@ -177,7 +175,7 @@ func mainLoop() {
 		syncing = true
 
 		// cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s >  %s.json", bucket, profile, bucket)
-		cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s", bucket, profile)
+		cmd := fmt.Sprintf("oci os object list --all -bn %s --prefix %s --profile %s", bucket, prefix, profile)
 		if debug {
 			fmt.Println(cmd)
 		}
@@ -196,7 +194,7 @@ func mainLoop() {
 		var result map[string]interface{}
 		json.Unmarshal(out, &result)
 
-		cached := get_local_bucket_metadata(output, bucket)
+		cached := get_local_bucket_metadata(output, bucket, prefix)
 		if diffs := jsondiff.JSONDiff(cached, result, true, ""); len(diffs) == 0 {
 			fmt.Print("🙈")
 		} else {
@@ -220,7 +218,7 @@ func mainLoop() {
 			for _, row := range newData {
 				t := row.(map[string]interface{})
 				name := t["name"].(string)
-				if strings.HasPrefix(name, prefix) && strings.HasSuffix(name, suffix){
+				if strings.HasPrefix(name, prefix) {
 					if val, ok := o[name]; ok {
 						if val == t["md5"] {
 							delete(o, name)
@@ -250,7 +248,7 @@ func mainLoop() {
 					}
 				}
 			}
-			writeFile(get_metadata_filename(output, bucket), string(out))
+			writeFile(get_metadata_filename(output, bucket, prefix), string(out))
 		}
 		syncing = false
 		time.Sleep(time.Duration(interval) * time.Second)
