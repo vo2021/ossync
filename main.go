@@ -21,6 +21,8 @@ import (
 var (
 	profile  = "profile-name"
 	bucket   = "bucket-name"
+	prefix   = "prefix-name"
+	suffix   = "suffix-name"
 	output   = "."
 	interval = 10 // seconds
 	debug    = false
@@ -149,6 +151,8 @@ func expandHome(path string) string {
 
 func main() {
 	flag.StringVar(&bucket, "bucket", "bucket-name", "the OCI bucket which is synced to local")
+	flag.StringVar(&prefix, "prefix", "", "the prefix of a folder or file in the OCI bucket which is synced to local")
+	flag.StringVar(&suffix, "suffix", "", "the suffix of a folder or file in the OCI bucket which is synced to local")
 	flag.StringVar(&profile, "profile", "DEFAULT", "the OCI profile name")
 	flag.StringVar(&output, "output", "", "the local folder path to sync to")
 	flag.IntVar(&interval, "interval", 10, "the interval between sync")
@@ -216,31 +220,33 @@ func mainLoop() {
 			for _, row := range newData {
 				t := row.(map[string]interface{})
 				name := t["name"].(string)
-				if val, ok := o[name]; ok {
-					if val == t["md5"] {
-						delete(o, name)
+				if strings.HasPrefix(name, prefix) && strings.HasSuffix(name, suffix){
+					if val, ok := o[name]; ok {
+						if val == t["md5"] {
+							delete(o, name)
+							continue
+						}
+					}
+					if strings.HasSuffix(name, "/") {
 						continue
 					}
-				}
-				if strings.HasSuffix(name, "/") {
-					continue
-				}
-				fmt.Printf("sync %s\n", name)
-				if strings.ContainsAny(name, "/") {
-					i := strings.LastIndex(name, "/")
-					if output != "" && !strings.HasSuffix(output, "/") {
-						output += "/"
-					}
-					folder := output + name[:i+1]
-					createFolder(folder)
-					outfile := output + name
-					cmd := fmt.Sprintf("oci os object get --name '%s' --file '%s' -bn %s --profile %s", name, outfile, bucket, profile)
-					if debug {
-						fmt.Println(cmd)
-					}
-					_, err := exec.Command("bash", "-c", cmd).Output()
-					if err != nil {
-						log.Fatal(err)
+					fmt.Printf("sync %s\n", name)
+					if strings.ContainsAny(name, "/") {
+						i := strings.LastIndex(name, "/")
+						if output != "" && !strings.HasSuffix(output, "/") {
+							output += "/"
+						}
+						folder := output + name[:i+1]
+						createFolder(folder)
+						outfile := output + name
+						cmd := fmt.Sprintf("oci os object get --name '%s' --file '%s' -bn %s --profile %s", name, outfile, bucket, profile)
+						if debug {
+							fmt.Println(cmd)
+						}
+						_, err := exec.Command("bash", "-c", cmd).Output()
+						if err != nil {
+							log.Fatal(err)
+						}
 					}
 				}
 			}
