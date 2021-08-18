@@ -99,7 +99,7 @@ func get_metadata_filename(output, bucket, prefix string) string {
 	if f == nil && err != nil {
 		println("create folder failed: " + fmt.Sprintf("error(%v)", err))
 	}
-	name := configFolder + "/" + strings.Replace(output, "/", "_", -1) + "-" + bucket+ "-" + strings.Replace(prefix, "/", "_", -1) + ".json"
+	name := configFolder + "/" + strings.Replace(output, "/", "_", -1) + "-" + bucket + "-" + strings.Replace(prefix, "/", "_", -1) + ".json"
 	if debug {
 		fmt.Println("metadata file name: " + name)
 	}
@@ -251,6 +251,9 @@ func mainLoop() {
 			writeFile(get_metadata_filename(output, bucket, prefix), string(out))
 		}
 		syncing = false
+		if interval < 1 {
+			break
+		}
 		time.Sleep(time.Duration(interval) * time.Second)
 	}
 
