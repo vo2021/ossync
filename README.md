@@ -16,7 +16,7 @@ Usage of ./ossync.exe:
   -debug
         debug mode
   -interval int
-        the interval between sync (default 10)
+        the interval between sync (default 10), -1 means run once
   -output string
         the local folder path to sync to
   -prefix string

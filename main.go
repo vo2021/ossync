@@ -153,7 +153,7 @@ func main() {
 	flag.StringVar(&prefix, "prefix", "", "the prefix of a folder or file in the OCI bucket which is synced to local")
 	flag.StringVar(&profile, "profile", "DEFAULT", "the OCI profile name")
 	flag.StringVar(&output, "output", "", "the local folder path to sync to")
-	flag.IntVar(&interval, "interval", 10, "the interval between sync")
+	flag.IntVar(&interval, "interval", 10, "the interval between sync, less than 1 means run once only")
 	flag.BoolVar(&debug, "debug", false, "debug mode")
 	flag.Parse()
 
