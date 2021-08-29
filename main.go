@@ -22,6 +22,7 @@ var (
 	profile  = "profile-name"
 	bucket   = "bucket-name"
 	prefix   = "prefix-name"
+	ns       = "namespace-name"
 	output   = "."
 	interval = 10 // seconds
 	debug    = false
@@ -151,6 +152,7 @@ func expandHome(path string) string {
 func main() {
 	flag.StringVar(&bucket, "bucket", "bucket-name", "the OCI bucket which is synced to local")
 	flag.StringVar(&prefix, "prefix", "", "the prefix of a folder or file in the OCI bucket which is synced to local")
+	flag.StringVar(&ns, "namespace", "", "the namespace of the bucket")
 	flag.StringVar(&profile, "profile", "DEFAULT", "the OCI profile name")
 	flag.StringVar(&output, "output", "", "the local folder path to sync to")
 	flag.IntVar(&interval, "interval", 10, "the interval between sync, less than 1 means run once only")
@@ -175,7 +177,13 @@ func mainLoop() {
 		syncing = true
 
 		// cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s >  %s.json", bucket, profile, bucket)
-		cmd := fmt.Sprintf("oci os object list --all -bn %s --prefix %s --profile %s", bucket, prefix, profile)
+		cmd := fmt.Sprintf("oci os object list --all -bn %s --profile %s", bucket, profile)
+		if prefix != ""{
+			cmd = fmt.Sprintf("%s --prefix %s", cmd, prefix)
+		}
+		if ns != ""{
+			cmd = fmt.Sprintf("%s --namespace %s", cmd, ns)
+		}
 		if debug {
 			fmt.Println(cmd)
 		}
@@ -238,6 +246,9 @@ func mainLoop() {
 						createFolder(folder)
 						outfile := output + name
 						cmd := fmt.Sprintf("oci os object get --name '%s' --file '%s' -bn %s --profile %s", name, outfile, bucket, profile)
+						if ns != ""{
+							cmd = fmt.Sprintf("%s --namespace %s", cmd, ns)
+						}
 						if debug {
 							fmt.Println(cmd)
 						}
